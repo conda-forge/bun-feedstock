@@ -31,7 +31,7 @@ libhwy:
 libsqlite:
 - '3'
 lol_html:
-- 2.7.1
+- 2.7.2
 macos_machine:
 - x86_64-apple-darwin13.4.0
 target_platform:
