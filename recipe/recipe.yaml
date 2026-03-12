@@ -71,6 +71,11 @@ requirements:
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
     - ${{ stdlib('c') }}
+    - if: linux
+      then:
+        # ensure libstdcxx-devel version matches libgcc-devel so that
+        # clang can find the C++ standard library headers
+        - libstdcxx-devel_linux-64 >=15
     - cmake
     - sed
     - ninja
