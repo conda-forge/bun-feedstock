@@ -12,5 +12,6 @@ build_platform:
 test: native_and_emulated
 conda_install_tool: pixi
 azure:
+  free_disk_space: true
   settings_linux:
     swapfile_size: 10GiB
