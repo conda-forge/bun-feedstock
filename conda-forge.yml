@@ -11,3 +11,6 @@ build_platform:
   linux_aarch64: linux_64
 test: native_and_emulated
 conda_install_tool: pixi
+azure:
+  settings_linux:
+    swapfile_size: 10GiB
