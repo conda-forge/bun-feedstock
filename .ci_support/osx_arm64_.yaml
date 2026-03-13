@@ -22,6 +22,8 @@ cxx_compiler:
 - clangxx
 cxx_compiler_version:
 - '21'
+hdrhistogram_c:
+- 0.11.9
 libarchive:
 - '3.8'
 libdeflate:
@@ -32,6 +34,8 @@ libsqlite:
 - '3'
 lol_html:
 - 2.7.2
+ls_hpack:
+- 2.3.4
 macos_machine:
 - arm64-apple-darwin20.0.0
 target_platform:
