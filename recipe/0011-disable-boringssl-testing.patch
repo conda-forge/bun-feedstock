@@ -1,0 +1,21 @@
+From e127a2f2b3d8601d371794054d603d8dcf00202f Mon Sep 17 00:00:00 2001
+From: Uwe Korn <uwelk@xhochy.com>
+Date: Fri, 13 Mar 2026 13:17:32 +0000
+Subject: [PATCH 11/12] disable boringssl testing
+
+---
+ cmake/targets/BuildBoringSSL.cmake | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/cmake/targets/BuildBoringSSL.cmake b/cmake/targets/BuildBoringSSL.cmake
+index d9ce01c..c740018 100644
+--- a/cmake/targets/BuildBoringSSL.cmake
++++ b/cmake/targets/BuildBoringSSL.cmake
+@@ -16,6 +16,7 @@ register_cmake_command(
+     decrepit
+   ARGS
+     -DBUILD_SHARED_LIBS=OFF
++    -DBUILD_TESTING=OFF
+   INCLUDES
+     include
+ )

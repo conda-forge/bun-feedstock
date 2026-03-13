@@ -1,17 +1,17 @@
-From 1a2ed06bc47a9fc9b3c8ccf383445d19ed61ae8f Mon Sep 17 00:00:00 2001
+From a6215e2b5c8641b2a996818c1d595f353c0dc7da Mon Sep 17 00:00:00 2001
 From: Pavel Zwerschke <pavelzw@gmail.com>
 Date: Sat, 7 Feb 2026 21:43:12 +0100
-Subject: [PATCH 6/9] don't use static libgcc, libcxx
+Subject: [PATCH 06/12] don't use static libgcc, libcxx
 
 ---
  cmake/targets/BuildBun.cmake | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/cmake/targets/BuildBun.cmake b/cmake/targets/BuildBun.cmake
-index 4a84ff822b..b3e654cff6 100644
+index 4eb32b2..cce35da 100644
 --- a/cmake/targets/BuildBun.cmake
 +++ b/cmake/targets/BuildBun.cmake
-@@ -1107,8 +1107,8 @@ if(LINUX)
+@@ -1123,8 +1123,8 @@ if(LINUX)
  
    if(NOT ABI STREQUAL "musl")
      target_link_options(${bun} PUBLIC

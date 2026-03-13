@@ -20,6 +20,9 @@ source:
       - if: linux
         then:
           - 0009-Use-system-ICU.patch
+      - 0010-cross-compile-tinycc-c2str.patch
+      - 0011-disable-boringssl-testing.patch
+      - 0012-skip-post-link-run-when-cross-compiling.patch
   - if: build_platform == "osx-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-x64.zip
@@ -64,7 +67,7 @@ source:
 
 build:
   skip: win
-  number: 1
+  number: 2
 
 requirements:
   build:
