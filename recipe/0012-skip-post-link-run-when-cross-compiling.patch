@@ -1,0 +1,69 @@
+From cc4888e2c5858cf7167025597e975f6e1615022c Mon Sep 17 00:00:00 2001
+From: Uwe Korn <uwelk@xhochy.com>
+Date: Fri, 13 Mar 2026 13:19:44 +0000
+Subject: [PATCH 12/12] skip post-link run when cross-compiling
+
+---
+ cmake/targets/BuildBun.cmake | 48 +++++++++++++++++++-----------------
+ 1 file changed, 25 insertions(+), 23 deletions(-)
+
+diff --git a/cmake/targets/BuildBun.cmake b/cmake/targets/BuildBun.cmake
+index c3060e5..d947187 100644
+--- a/cmake/targets/BuildBun.cmake
++++ b/cmake/targets/BuildBun.cmake
+@@ -1434,30 +1434,32 @@ if(NOT BUN_CPP_ONLY)
+   # ==856230==See https://github.com/google/sanitizers/issues/856 for possible workarounds.
+   # the linked issue refers to very old kernels but this still happens to us on modern ones.
+   # disabling ASLR to run the binary works around it
+-  set(TEST_BUN_COMMAND_BASE ${BUILD_PATH}/${bunExe} --revision)
+-  set(TEST_BUN_COMMAND_ENV_WRAP
+-    ${CMAKE_COMMAND} -E env BUN_DEBUG_QUIET_LOGS=1)
+-  if (LINUX AND ENABLE_ASAN)
+-    set(TEST_BUN_COMMAND
+-      ${TEST_BUN_COMMAND_ENV_WRAP} setarch ${CMAKE_HOST_SYSTEM_PROCESSOR} -R ${TEST_BUN_COMMAND_BASE}
+-      || ${TEST_BUN_COMMAND_ENV_WRAP} ${TEST_BUN_COMMAND_BASE})
+-  else()
+-    set(TEST_BUN_COMMAND
+-      ${TEST_BUN_COMMAND_ENV_WRAP} ${TEST_BUN_COMMAND_BASE})
+-  endif()
++  if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL CMAKE_SYSTEM_PROCESSOR)
++    set(TEST_BUN_COMMAND_BASE ${BUILD_PATH}/${bunExe} --revision)
++    set(TEST_BUN_COMMAND_ENV_WRAP
++      ${CMAKE_COMMAND} -E env BUN_DEBUG_QUIET_LOGS=1)
++    if (LINUX AND ENABLE_ASAN)
++      set(TEST_BUN_COMMAND
++        ${TEST_BUN_COMMAND_ENV_WRAP} setarch ${CMAKE_HOST_SYSTEM_PROCESSOR} -R ${TEST_BUN_COMMAND_BASE}
++        || ${TEST_BUN_COMMAND_ENV_WRAP} ${TEST_BUN_COMMAND_BASE})
++    else()
++      set(TEST_BUN_COMMAND
++        ${TEST_BUN_COMMAND_ENV_WRAP} ${TEST_BUN_COMMAND_BASE})
++    endif()
+ 
+-  register_command(
+-    TARGET
+-      ${bun}
+-    TARGET_PHASE
+-      POST_BUILD
+-    COMMENT
+-      "Testing ${bun}"
+-    COMMAND
+-      ${TEST_BUN_COMMAND}
+-    CWD
+-      ${BUILD_PATH}
+-  )
++    register_command(
++      TARGET
++        ${bun}
++      TARGET_PHASE
++        POST_BUILD
++      COMMENT
++        "Testing ${bun}"
++      COMMAND
++        ${TEST_BUN_COMMAND}
++      CWD
++        ${BUILD_PATH}
++    )
++  endif()
+ 
+   if(CI)
+     set(BUN_FEATURES_SCRIPT ${CWD}/scripts/features.mjs)

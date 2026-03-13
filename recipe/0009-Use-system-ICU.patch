@@ -1,19 +1,19 @@
-From bfa09cab892b9460d4cd47adfa9d647395951a1e Mon Sep 17 00:00:00 2001
+From 35ea82a8dc49ad73d9ed693ea60d9f68d27d1e4f Mon Sep 17 00:00:00 2001
 From: I-Al-Istannen <i-al-istannen@users.noreply.github.com>
 Date: Tue, 10 Feb 2026 22:25:43 +0100
-Subject: [PATCH] Use system ICU
+Subject: [PATCH 09/12] Use system ICU
 
 ---
  cmake/targets/BuildBun.cmake | 18 ++++--------------
  1 file changed, 4 insertions(+), 14 deletions(-)
 
 diff --git a/cmake/targets/BuildBun.cmake b/cmake/targets/BuildBun.cmake
-index 2b7d3a79f..f588bb269 100644
+index d08f98a..c3060e5 100644
 --- a/cmake/targets/BuildBun.cmake
 +++ b/cmake/targets/BuildBun.cmake
-@@ -1298,11 +1298,6 @@ endforeach()
- list(TRANSFORM BUN_DEPENDENCIES TOLOWER OUTPUT_VARIABLE BUN_TARGETS)
- add_custom_target(dependencies DEPENDS ${BUN_TARGETS})
+@@ -1306,11 +1306,6 @@ target_link_libraries(${bun} PRIVATE
+   zstd
+ )
  
 -if(APPLE)
 -  target_link_libraries(${bun} PRIVATE icucore resolv)
@@ -23,7 +23,7 @@ index 2b7d3a79f..f588bb269 100644
  if(USE_STATIC_SQLITE)
    target_compile_definitions(${bun} PRIVATE LAZY_LOAD_SQLITE=0)
  else()
-@@ -1317,17 +1312,12 @@ if(LINUX)
+@@ -1325,17 +1320,12 @@ if(LINUX)
    else()
      target_link_libraries(${bun} PUBLIC libatomic.so)
    endif()

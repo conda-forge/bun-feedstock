@@ -1,0 +1,129 @@
+From 016235dc8c508eb6974d0bc2c346aff928c8db41 Mon Sep 17 00:00:00 2001
+From: Uwe Korn <uwelk@xhochy.com>
+Date: Fri, 13 Mar 2026 13:14:12 +0000
+Subject: [PATCH 10/12] cross-compile tinycc c2str
+
+---
+ patches/tinycc/CMakeLists.txt | 64 ++++++++++++++++++++++++++++++-----
+ 1 file changed, 55 insertions(+), 9 deletions(-)
+
+diff --git a/patches/tinycc/CMakeLists.txt b/patches/tinycc/CMakeLists.txt
+index a31398d..64abf7e 100644
+--- a/patches/tinycc/CMakeLists.txt
++++ b/patches/tinycc/CMakeLists.txt
+@@ -83,20 +83,35 @@ set(TCC_SOURCES
+   tccrun.c
+ )
+ 
+-if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64|ARM64")
++set(TCC_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
++if(DEFINED CMAKE_C_COMPILER_TARGET AND NOT "${CMAKE_C_COMPILER_TARGET}" STREQUAL "")
++  set(TCC_TARGET_PROCESSOR "${CMAKE_C_COMPILER_TARGET}")
++else()
++  execute_process(
++    COMMAND ${CMAKE_C_COMPILER} -print-target-triple
++    OUTPUT_VARIABLE TCC_TARGET_TRIPLE
++    OUTPUT_STRIP_TRAILING_WHITESPACE
++    ERROR_QUIET
++  )
++  if(TCC_TARGET_TRIPLE)
++    set(TCC_TARGET_PROCESSOR "${TCC_TARGET_TRIPLE}")
++  endif()
++endif()
++
++if(TCC_TARGET_PROCESSOR MATCHES "arm64|aarch64|ARM64|AARCH64")
+   list(APPEND TCC_SOURCES
+     arm64-gen.c
+     arm64-link.c
+     arm64-asm.c
+   )
+-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|x64|amd64|AMD64")
++elseif(TCC_TARGET_PROCESSOR MATCHES "x86_64|x64|amd64|AMD64")
+   list(APPEND TCC_SOURCES
+     x86_64-gen.c
+     x86_64-link.c
+     i386-asm.c
+   )
+ else()
+-  message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
++  message(FATAL_ERROR "Unsupported architecture: ${TCC_TARGET_PROCESSOR}")
+ endif()
+ 
+ if(APPLE)
+@@ -107,8 +122,33 @@ if(WIN32)
+   list(APPEND TCC_SOURCES tccpe.c)
+ endif()
+ 
+-add_executable(c2str.exe conftest.c)
+-target_compile_options(c2str.exe PRIVATE -DC2STR)
++set(C2STR_EXE ${CMAKE_CURRENT_BINARY_DIR}/c2str.exe)
++set(C2STR_CROSS_BUILD OFF)
++if(DEFINED ENV{CC_FOR_BUILD} AND NOT "$ENV{CC_FOR_BUILD}" STREQUAL "${CMAKE_C_COMPILER}")
++  set(C2STR_CROSS_BUILD ON)
++endif()
++
++if(C2STR_CROSS_BUILD)
++  if(NOT DEFINED ENV{CC_FOR_BUILD})
++    message(FATAL_ERROR "CC_FOR_BUILD is required to build c2str.exe when cross-compiling")
++  endif()
++
++  add_custom_command(
++    OUTPUT
++      ${C2STR_EXE}
++    COMMAND
++      $ENV{CC_FOR_BUILD} -DC2STR ${CMAKE_CURRENT_SOURCE_DIR}/conftest.c -o ${C2STR_EXE}
++    DEPENDS
++      ${CMAKE_CURRENT_SOURCE_DIR}/conftest.c
++    VERBATIM
++  )
++  add_custom_target(build-c2str DEPENDS ${C2STR_EXE})
++  set(C2STR_DEPENDENCY build-c2str)
++else()
++  add_executable(c2str.exe conftest.c)
++  target_compile_options(c2str.exe PRIVATE -DC2STR)
++  set(C2STR_DEPENDENCY c2str.exe)
++endif()
+ 
+ # somehow on some Linux systems we need to disable ASLR for ASAN-instrumented binaries to run
+ # when spawned by cmake (they run fine from a shell!)
+@@ -119,7 +159,7 @@ target_compile_options(c2str.exe PRIVATE -DC2STR)
+ # ==856230==See https://github.com/google/sanitizers/issues/856 for possible workarounds.
+ # the linked issue refers to very old kernels but this still happens to us on modern ones.
+ # disabling ASLR to run the binary works around it
+-set(C2STR_COMMAND $<TARGET_FILE:c2str.exe> include/tccdefs.h tccdefs_.h)
++set(C2STR_COMMAND ${C2STR_EXE} include/tccdefs.h tccdefs_.h)
+ if(LINUX AND (CMAKE_C_FLAGS MATCHES "-fsanitize"))
+   # our CI builds run in a container where setarch isn't allowed to change the personality.
+   # but the ASan binaries seem to run fine there without ASLR disabled
+@@ -128,14 +168,20 @@ if(LINUX AND (CMAKE_C_FLAGS MATCHES "-fsanitize"))
+ endif()
+ 
+ add_custom_command(
+-  TARGET
+-    c2str.exe POST_BUILD
++  OUTPUT
++    ${CMAKE_CURRENT_SOURCE_DIR}/tccdefs_.h
+   COMMAND
+     ${C2STR_COMMAND}
++  DEPENDS
++    ${C2STR_DEPENDENCY}
++    ${CMAKE_CURRENT_SOURCE_DIR}/include/tccdefs.h
+   WORKING_DIRECTORY
+     ${CMAKE_CURRENT_SOURCE_DIR}
++  VERBATIM
+ )
+ 
++add_custom_target(generate_tccdefs DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tccdefs_.h)
++
+ add_library(tcc STATIC ${TCC_SOURCES})
+ 
+ add_custom_command(
+@@ -147,7 +193,7 @@ add_custom_command(
+     ${CMAKE_CURRENT_SOURCE_DIR}
+ )
+ 
+-add_dependencies(tcc c2str.exe)
++add_dependencies(tcc generate_tccdefs)
+ 
+ target_include_directories(tcc PUBLIC 
+   ${CMAKE_CURRENT_SOURCE_DIR}

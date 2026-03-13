@@ -1,0 +1,54 @@
+From 24e85589caa7bf4b275625f51be856a35c9151e5 Mon Sep 17 00:00:00 2001
+From: I-Al-Istannen <i-al-istannen@users.noreply.github.com>
+Date: Tue, 10 Feb 2026 22:11:37 +0100
+Subject: [PATCH 04/12] Disable Werror
+
+---
+ cmake/targets/BuildBun.cmake | 23 -----------------------
+ 1 file changed, 23 deletions(-)
+
+diff --git a/cmake/targets/BuildBun.cmake b/cmake/targets/BuildBun.cmake
+index c0ad8a3..39de33b 100644
+--- a/cmake/targets/BuildBun.cmake
++++ b/cmake/targets/BuildBun.cmake
+@@ -996,40 +996,17 @@ if(NOT WIN32)
+     endif()
+ 
+     target_compile_options(${bun} PUBLIC
+-      -Werror=return-type
+-      -Werror=return-stack-address
+-      -Werror=implicit-function-declaration
+-      -Werror=uninitialized
+-      -Werror=conditional-uninitialized
+-      -Werror=suspicious-memaccess
+-      -Werror=int-conversion
+-      -Werror=nonnull
+-      -Werror=move
+-      -Werror=sometimes-uninitialized
+-      -Werror=unused
+       -Wno-unused-function
+       -Wno-c++23-lambda-attributes
+       -Wno-nullability-completeness
+       -Wno-character-conversion
+-      -Werror
+     )
+   else()
+     # Leave -Werror=unused off in release builds so we avoid errors from being used in ASSERT
+     target_compile_options(${bun} PUBLIC ${LTO_FLAG}
+-      -Werror=return-type
+-      -Werror=return-stack-address
+-      -Werror=implicit-function-declaration
+-      -Werror=uninitialized
+-      -Werror=conditional-uninitialized
+-      -Werror=suspicious-memaccess
+-      -Werror=int-conversion
+-      -Werror=nonnull
+-      -Werror=move
+-      -Werror=sometimes-uninitialized
+       -Wno-c++23-lambda-attributes
+       -Wno-nullability-completeness
+       -Wno-character-conversion
+-      -Werror
+     )
+ 
+     if(ENABLE_ASAN)
