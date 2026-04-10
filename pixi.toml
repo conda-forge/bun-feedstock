@@ -5,7 +5,7 @@
 
 [workspace]
 name = "bun-feedstock"
-version = "3.56.3"  # conda-smithy version used to generate this file
+version = "3.59.1"  # conda-smithy version used to generate this file
 description = "Pixi configuration for conda-forge/bun-feedstock"
 authors = ["@conda-forge/bun"]
 channels = ["conda-forge"]
