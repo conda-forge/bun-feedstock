@@ -23,7 +23,7 @@ docker_image:
 hdrhistogram_c:
 - 0.11.9
 icu:
-- '75'
+- '78'
 libarchive:
 - '3.8'
 libdeflate:
