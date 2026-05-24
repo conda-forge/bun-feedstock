@@ -35,7 +35,7 @@ libsqlite:
 lol_html:
 - 2.7.2
 ls_hpack:
-- 2.3.4
+- 2.3.5
 target_platform:
 - linux-aarch64
 zip_keys:
