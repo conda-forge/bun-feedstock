@@ -33,7 +33,7 @@ libhwy:
 libsqlite:
 - '3'
 lol_html:
-- 2.7.2
+- 2.9.0
 ls_hpack:
 - 2.3.5
 macos_machine:

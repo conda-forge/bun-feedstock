@@ -67,7 +67,7 @@ source:
 
 build:
   skip: win
-  number: 2
+  number: 3
 
 requirements:
   build:
