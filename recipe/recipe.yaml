@@ -1,5 +1,5 @@
 context:
-  version: "1.4.2"
+  version: "1.4.3"
 
 package:
   name: bun
@@ -7,7 +7,7 @@ package:
 
 source:
   - url: https://github.com/oven-sh/bun/archive/refs/tags/bun-v${{ version }}.tar.gz
-    sha256: e14670b117d69012d828514d657f0a3133d1c25d13d69461184d05b6a8e9a876
+    sha256: 2366bc56d092f8535bbe5827788e20d987fbc96798de4d683e0ca78ea286ebf4
     patches:
       - 0001-Disable-Werror.patch
       - 0002-Don-t-statically-link-libstdc-and-libgcc.patch
