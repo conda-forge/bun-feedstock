@@ -9,7 +9,7 @@ c_stdlib:
 c_stdlib_version:
 - '2.28'
 channel_sources:
-- conda-forge
+- conda-forge/label/rust_dev,conda-forge
 channel_targets:
 - conda-forge main
 cxx_compiler:

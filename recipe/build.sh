@@ -43,9 +43,8 @@ if [[ "${target_platform}" == linux-* ]]; then
 fi
 export PATH="${toolchain}/bin:${PATH}"
 
-# Use conda-forge's stable Rust; bun's build relies on nightly-only flags.
+# Use conda-forge's nightly Rust instead of a rustup toolchain.
 export BUN_TOOLCHAIN_RUST="${BUILD_PREFIX}"
-export RUSTC_BOOTSTRAP=1
 
 # Use the unpatched upstream dependencies from $PREFIX instead of building
 # the vendored copies (patch 0007). sqlite is only built on Linux; macOS
@@ -53,8 +52,8 @@ export RUSTC_BOOTSTRAP=1
 export BUN_SYSTEM_DEPS="brotli,hdrhistogram,highway,libdeflate,libjpeg-turbo,libwebp,lshpack,sqlite,zlib,zstd"
 export BUN_SYSTEM_DEPS_PREFIX="${PREFIX}"
 
-# GIT_SHA (set in recipe.yaml) is the build revision; these would take precedence
-unset CI BUILDKITE_COMMIT GITHUB_SHA
+# bun's build switches to its own CI mode (env dumps, artifact downloads) when CI is set
+unset CI
 
 build_args=(
   --profile=release
