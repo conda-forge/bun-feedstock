@@ -10,21 +10,22 @@ export PATH="$(pwd)/bun.native:${PATH}"
 # already carry the target triple, sysroot and flags of the build environment.
 toolchain="${SRC_DIR}/conda-toolchain"
 mkdir -p "${toolchain}/bin"
-# bun's build ignores LDFLAGS, so add them to link invocations (e.g. to link
-# against libcxx/libstdcxx from $PREFIX instead of the system's).
+# conda's clang finds its target and config from the name it is invoked by, so
+# these have to be wrappers instead of symlinks.
 # rust's compiler activation pulls in gcc, which overrides CC, so use CLANG/CLANGXX.
 for wrapper in clang:"${CLANG:-${CC}}" clang++:"${CLANGXX:-${CXX}}"; do
-  cat > "${toolchain}/bin/${wrapper%%:*}" <<EOF
-#!/bin/bash
-for arg in "\$@"; do
-  case "\$arg" in
-    -c|-E|-S|-M|-MM|-print-*|--version) exec ${wrapper#*:} "\$@" ;;
-  esac
-done
-exec ${wrapper#*:} "\$@" ${LDFLAGS}
-EOF
+  printf '#!/bin/bash\nexec %s "$@"\n' "${wrapper#*:}" > "${toolchain}/bin/${wrapper%%:*}"
   chmod +x "${toolchain}/bin/${wrapper%%:*}"
 done
+# bun's build ignores LDFLAGS, so have clang append them to every invocation
+# (e.g. to link against libcxx/libstdcxx from $PREFIX instead of the system's).
+# The leading '#' keeps clang from printing the edits; -Qunused-arguments
+# silences the warnings about them in compile-only invocations.
+CCC_OVERRIDE_OPTIONS="# +-Qunused-arguments"
+for flag in ${LDFLAGS}; do
+  CCC_OVERRIDE_OPTIONS+=" +${flag}"
+done
+export CCC_OVERRIDE_OPTIONS
 if [[ "${target_platform}" == linux-* ]]; then
   # GNU strip is looked up on PATH
   ln -sf "$(command -v "${STRIP}")" "${toolchain}/bin/strip"
