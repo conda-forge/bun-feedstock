@@ -16,6 +16,7 @@ source:
       - 0005-Use-the-macOS-SDK-from-the-conda-build-environment.patch
       - 0006-Allow-linking-selected-dependencies-from-the-system.patch
       - 0007-Set-the-build-revision-to-a-placeholder.patch
+      - 0008-Build-with-conda-forge-s-rust-1.101-nightly.patch
   - if: build_platform == "osx-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-x64.zip
