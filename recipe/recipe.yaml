@@ -17,6 +17,7 @@ source:
       - 0004-Use-prebuilt-Rust-std-for-release-builds.patch
       - 0005-Support-cross-compiling-with-conda-forge-s-compilers.patch
       - 0006-Use-the-macOS-SDK-from-the-conda-build-environment.patch
+      - 0007-Allow-linking-selected-dependencies-from-the-system.patch
   - if: build_platform == "osx-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-x64.zip
@@ -76,14 +77,27 @@ requirements:
       then:
         - lld ${{ c_compiler_version }}.*
         - llvm-tools ${{ c_compiler_version }}.*
-    - if: x86_64
-      then:
-        # SIMD sources of the vendored libjpeg-turbo
-        - nasm
     - ninja
     - perl
     - pkg-config
     - sed
+  host:
+    # unpatched upstream dependencies, used instead of the vendored copies
+    # (see BUN_SYSTEM_DEPS in build.sh)
+    # headers of libbrotli{common,dec,enc}
+    - brotli
+    - hdrhistogram-c
+    - libdeflate
+    - libhwy
+    - libjpeg-turbo
+    - libwebp-base
+    - ls-hpack
+    - zlib
+    - zstd
+    - if: linux
+      then:
+        # on macOS, bun loads the system's libsqlite3 at runtime
+        - libsqlite
 
 tests:
   - package_contents:

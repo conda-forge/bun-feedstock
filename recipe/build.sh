@@ -47,6 +47,12 @@ export PATH="${toolchain}/bin:${PATH}"
 export BUN_TOOLCHAIN_RUST="${BUILD_PREFIX}"
 export RUSTC_BOOTSTRAP=1
 
+# Use the unpatched upstream dependencies from $PREFIX instead of building
+# the vendored copies (patch 0007). sqlite is only built on Linux; macOS
+# loads the system's libsqlite3 at runtime.
+export BUN_SYSTEM_DEPS="brotli,hdrhistogram,highway,libdeflate,libjpeg-turbo,libwebp,lshpack,sqlite,zlib,zstd"
+export BUN_SYSTEM_DEPS_PREFIX="${PREFIX}"
+
 # GIT_SHA (set in recipe.yaml) is the build revision; these would take precedence
 unset CI BUILDKITE_COMMIT GITHUB_SHA
 
