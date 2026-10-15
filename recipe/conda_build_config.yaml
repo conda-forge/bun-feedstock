@@ -2,11 +2,11 @@ c_compiler:
   - clang
 cxx_compiler:
   - clangxx
-# https://github.com/oven-sh/bun/blob/9484218ba455ba591ebf75ad4fca98b012f3dd13/CONTRIBUTING.md?plain=1#L93
+# https://github.com/oven-sh/bun/blob/bun-v1.4.3/CONTRIBUTING.md?plain=1#L97
 c_compiler_version:    # [unix]
-- 21                   # [unix]
+- 23                   # [unix]
 cxx_compiler_version:  # [unix]
-- 21                   # [unix]
+- 23                   # [unix]
 # https://github.com/oven-sh/bun/blob/b7475d87689307c8f0c4f008e878f4b5fb0cd7da/cmake/tools/SetupMacSDK.cmake#L1
 c_stdlib_version:      # [osx]
 - 13.0                 # [osx]
@@ -17,3 +17,8 @@ c_stdlib_version:      # [linux]
 # bun needs a nightly rust (see rust-toolchain.toml)
 channel_sources:
   - conda-forge/label/rust_dev,conda-forge
+# bun 1.4.3 pins nightly-2026-09-15 (rust-toolchain.toml), which conda-forge
+# doesn't have; the 1.99 nightly is too old (no core::alloc::AllocatorClone),
+# so use the 1.101 nightly (see patch 0008)
+rust_compiler_version:
+  - 1.101.0

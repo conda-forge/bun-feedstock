@@ -1,5 +1,5 @@
 context:
-  version: "1.4.2"
+  version: "1.4.3"
 
 package:
   name: bun
@@ -7,40 +7,40 @@ package:
 
 source:
   - url: https://github.com/oven-sh/bun/archive/refs/tags/bun-v${{ version }}.tar.gz
-    sha256: e14670b117d69012d828514d657f0a3133d1c25d13d69461184d05b6a8e9a876
+    sha256: 2366bc56d092f8535bbe5827788e20d987fbc96798de4d683e0ca78ea286ebf4
     patches:
       - 0001-Disable-Werror.patch
       - 0002-Don-t-statically-link-libstdc-and-libgcc.patch
       - 0003-Disable-ld_new.patch
-      - 0004-Use-prebuilt-Rust-std-for-release-builds.patch
-      - 0005-Support-cross-compiling-with-conda-forge-s-compilers.patch
-      - 0006-Use-the-macOS-SDK-from-the-conda-build-environment.patch
-      - 0007-Allow-linking-selected-dependencies-from-the-system.patch
-      - 0008-Set-the-build-revision-to-a-placeholder.patch
+      - 0004-Support-cross-compiling-with-conda-forge-s-compilers.patch
+      - 0005-Use-the-macOS-SDK-from-the-conda-build-environment.patch
+      - 0006-Allow-linking-selected-dependencies-from-the-system.patch
+      - 0007-Set-the-build-revision-to-a-placeholder.patch
+      - 0008-Build-with-conda-forge-s-rust-1.101-nightly.patch
   - if: build_platform == "osx-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-x64.zip
-      sha256: 80520d7e17526308c9185d261679ac6d27798d3803a0e9f7ff9121ab8affb012
+      sha256: 62660e6438eb872278877acca77e1152d5d031324df368d4a81b428211489d2d
       target_directory: bun.native
   - if: build_platform == "osx-arm64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-aarch64.zip
-      sha256: 90987a3a16d7db556d886ac3d551e7b6d3edf0a1cf43acaed622e8676be1d12f
+      sha256: 80afd4c069b46a6fa8f3ec520bebc750a7843e4a8d5b9583d29ad436c00a3403
       target_directory: bun.native
   - if: build_platform == "linux-aarch64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-linux-aarch64.zip
-      sha256: 54328bbc2d9c8e0c9f892c544d66c57a83b84139e34909e5ee81758f1ac8fda7
+      sha256: efa9813da5ed72423bf847f916e8d2c47c0d776add972354026a75e10da9aa21
       target_directory: bun.native
   - if: build_platform == "linux-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-linux-x64-baseline.zip
-      sha256: c678040f14fe0440eb839d37cbd0ce4c051a32da72806ac97de6a6aab6bf728f
+      sha256: 1fc2edac843102909e3a1be1d8d9802cc6071cf074e67e88231f4ffe0f8b397b
       target_directory: bun.native
   - if: build_platform == "win-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-windows-x64.zip
-      sha256: ce4c17497b2f29712a99d3d53f028de28cd42e3bacb8589599e7f000e49b6405
+      sha256: 0bf84e808552beea67bf1202a287a35c6c825d837b287b3f8e9dd513dba35d3d
       target_directory: bun.native
   # simdutf is statically linked via the prebuilt WebKit, which doesn't ship its license
   - url: https://raw.githubusercontent.com/simdutf/simdutf/refs/heads/master/LICENSE-MIT
@@ -61,6 +61,8 @@ requirements:
     - ${{ compiler('cxx') }}
     # nightly rust from conda-forge/label/rust_dev (see conda_build_config.yaml)
     - ${{ compiler('rust') }}
+    # bun always builds std from source (-Zbuild-std)
+    - rust-src
     - ${{ stdlib('c') }}
     - if: linux
       then:

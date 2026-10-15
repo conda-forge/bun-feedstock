@@ -7,7 +7,7 @@ brotli:
 c_compiler:
 - clang
 c_compiler_version:
-- '21'
+- '23'
 c_stdlib:
 - macosx_deployment_target
 c_stdlib_version:
@@ -19,7 +19,7 @@ channel_targets:
 cxx_compiler:
 - clangxx
 cxx_compiler_version:
-- '21'
+- '23'
 hdrhistogram_c:
 - 0.11.10
 libdeflate:
@@ -38,6 +38,8 @@ perl:
 - 5.32.1
 rust_compiler:
 - rust
+rust_compiler_version:
+- 1.101.0
 target_platform:
 - osx-64
 zip_keys:
