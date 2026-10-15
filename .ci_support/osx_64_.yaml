@@ -4,8 +4,6 @@ MACOSX_SDK_VERSION:
 - '13.0'
 brotli:
 - '1.2'
-c_ares:
-- '1'
 c_compiler:
 - clang
 c_compiler_version:
@@ -15,7 +13,7 @@ c_stdlib:
 c_stdlib_version:
 - '13.0'
 channel_sources:
-- conda-forge
+- conda-forge/label/rust_dev,conda-forge
 channel_targets:
 - conda-forge main
 cxx_compiler:
@@ -23,21 +21,23 @@ cxx_compiler:
 cxx_compiler_version:
 - '21'
 hdrhistogram_c:
-- 0.11.9
-libarchive:
-- '3.8'
+- 0.11.10
 libdeflate:
 - '1.25'
 libhwy:
 - '1.4'
-libsqlite:
+libjpeg_turbo:
 - '3'
-lol_html:
-- 3.0.1
+libwebp_base:
+- '1'
 ls_hpack:
 - 2.3.5
 macos_machine:
 - x86_64-apple-darwin13.4.0
+perl:
+- 5.32.1
+rust_compiler:
+- rust
 target_platform:
 - osx-64
 zip_keys:

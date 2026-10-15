@@ -1,0 +1,23 @@
+From 5840084fbcb7f97942f4151b5d6319d2af8afc4a Mon Sep 17 00:00:00 2001
+From: Julia Haag <julia.haag@quantco.com>
+Date: Thu, 8 Oct 2026 13:15:33 +0200
+Subject: [PATCH 6/6] Use the macOS SDK from the conda build environment
+
+---
+ scripts/build/config.ts | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/scripts/build/config.ts b/scripts/build/config.ts
+index e7cb8f8e..0e72f261 100644
+--- a/scripts/build/config.ts
++++ b/scripts/build/config.ts
+@@ -1330,6 +1330,9 @@ function detectMacosSdk(ci: boolean): { osxDeploymentTarget: string; osxSysroot:
+ 
+   let osxSysroot: string | undefined;
+   let sdkVersionFromPath: string | undefined;
++  // conda-forge: build against the SDK selected by the build environment.
++  const sdkRoot = process.env.CONDA_BUILD_SYSROOT ?? process.env.SDKROOT;
++  if (sdkRoot !== undefined && existsSync(sdkRoot)) candidates.unshift(sdkRoot);
+   for (const path of candidates) {
+     if (existsSync(path)) {
+       osxSysroot = path; // symlink — matches xcrun's output

@@ -1,0 +1,21 @@
+From d0b73fcf26911590df2b1de49605ed2866f8b468 Mon Sep 17 00:00:00 2001
+From: Julia Haag <julia.haag@quantco.com>
+Date: Thu, 8 Oct 2026 13:14:31 +0200
+Subject: [PATCH 1/6] Disable -Werror
+
+---
+ scripts/build/flags.ts | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/scripts/build/flags.ts b/scripts/build/flags.ts
+index 0b377562..9a056708 100644
+--- a/scripts/build/flags.ts
++++ b/scripts/build/flags.ts
+@@ -690,7 +690,6 @@ export const bunOnlyFlags: Flag[] = [
+       "-Wno-c++23-lambda-attributes",
+       "-Wno-nullability-completeness",
+       "-Wno-character-conversion",
+-      "-Werror",
+     ],
+     when: c => c.unix,
+     desc: "Treat most warnings as errors; suppress known-noisy ones",

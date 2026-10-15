@@ -1,0 +1,25 @@
+From 6ce3c56f9a64316dfd9c74ed43d9bef0f467aa50 Mon Sep 17 00:00:00 2001
+From: Julia Haag <julia.haag@quantco.com>
+Date: Thu, 8 Oct 2026 13:14:41 +0200
+Subject: [PATCH 2/6] Don't statically link libstdc++ and libgcc
+
+---
+ scripts/build/flags.ts | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/scripts/build/flags.ts b/scripts/build/flags.ts
+index 9a056708..9539c6e1 100644
+--- a/scripts/build/flags.ts
++++ b/scripts/build/flags.ts
+@@ -1237,11 +1237,6 @@ export const linkerFlags: Flag[] = [
+     when: c => c.linux,
+     desc: "Retry pthread_create EAGAIN caused by an in-flight execve",
+   },
+-  {
+-    flag: ["-static-libstdc++", "-static-libgcc"],
+-    when: c => c.linux && c.abi === "gnu",
+-    desc: "Static C++ runtime (don't depend on host libstdc++)",
+-  },
+   {
+     flag: ["-lstdc++", "-lgcc"],
+     when: c => c.linux && c.abi === "musl",

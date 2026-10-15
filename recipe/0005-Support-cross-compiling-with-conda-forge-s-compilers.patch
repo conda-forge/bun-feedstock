@@ -1,0 +1,42 @@
+From 902c9b37e099161898420e920cd5a3760959bca5 Mon Sep 17 00:00:00 2001
+From: Julia Haag <julia.haag@quantco.com>
+Date: Thu, 8 Oct 2026 13:15:22 +0200
+Subject: [PATCH 5/6] Support cross-compiling with conda-forge's compilers
+
+---
+ scripts/build/config.ts | 5 ++++-
+ scripts/build/tools.ts  | 5 +++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/build/config.ts b/scripts/build/config.ts
+index 671839b7..e7cb8f8e 100644
+--- a/scripts/build/config.ts
++++ b/scripts/build/config.ts
+@@ -1034,7 +1034,10 @@ export function resolveConfig(partial: PartialConfig, toolchain: Toolchain): Con
+             ? partial.linuxSysroot
+             : resolve(cwd, partial.linuxSysroot)
+           : detectLinuxGlibcSysroot(arch);
+-      if (sysroot !== undefined || isCross) {
++      // conda-forge: with BUN_TOOLCHAIN_LLVM pointing at target-prefixed
++      // compiler wrappers (which already set target and sysroot), a
++      // cross-build needs no extra --target/--sysroot.
++      if (sysroot !== undefined || (isCross && process.env.BUN_TOOLCHAIN_LLVM === undefined)) {
+         crossTarget = `${llvmArch}-linux-gnu`;
+         if (sysroot === undefined) {
+           const p = arch === "aarch64" ? "/opt/linux-sysroot-glibc-arm64" : "/opt/linux-sysroot-glibc";
+diff --git a/scripts/build/tools.ts b/scripts/build/tools.ts
+index 4aa4474b..75d3d4cf 100644
+--- a/scripts/build/tools.ts
++++ b/scripts/build/tools.ts
+@@ -489,6 +489,11 @@ export function resolveLlvmToolchain(
+   if (msvcTarget && os !== "windows") {
+     hostCc = findLlvmTool("clang", paths, os, { checkVersion: false, required: true })?.path;
+     hostCxx = findLlvmTool("clang++", paths, os, { checkVersion: false, required: true })?.path;
++  } else if (process.env.CC_FOR_BUILD && process.env.CXX_FOR_BUILD) {
++    // conda-forge: cross-compilers are target-prefixed wrappers; host tools
++    // must be built with the build-platform compiler instead.
++    hostCc = process.env.CC_FOR_BUILD;
++    hostCxx = process.env.CXX_FOR_BUILD;
+   }
+ 
+   // ar: llvm-ar (or llvm-lib for windows targets)

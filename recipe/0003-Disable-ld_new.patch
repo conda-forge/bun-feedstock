@@ -1,0 +1,23 @@
+From 0e73ab173b7c6bd4b4a9c01553bbcbd0badc1990 Mon Sep 17 00:00:00 2001
+From: Julia Haag <julia.haag@quantco.com>
+Date: Thu, 8 Oct 2026 13:14:41 +0200
+Subject: [PATCH 3/6] Disable -ld_new
+
+---
+ scripts/build/flags.ts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/build/flags.ts b/scripts/build/flags.ts
+index 9539c6e1..8cfa0f11 100644
+--- a/scripts/build/flags.ts
++++ b/scripts/build/flags.ts
+@@ -1090,7 +1090,8 @@ export const linkerFlags: Flag[] = [
+     // understood) when Apple's ld driver does the link. ld64.lld (the
+     // cross-link path) parses it as `-l d_new` and fails.
+     flag: "-Wl,-ld_new",
+-    when: c => c.darwin && c.crossTarget === undefined,
++    // conda-forge: ld64 from cctools does not understand -ld_new
++    when: () => false,
+     desc: "Use new Apple linker (native darwin links only)",
+   },
+   {
