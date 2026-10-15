@@ -89,20 +89,21 @@ requirements:
     - pkg-config
   host:
     # unpatched upstream dependencies, used instead of the vendored copies
-    # (see BUN_SYSTEM_DEPS in build.sh); Windows uses the vendored copies
+    # (see BUN_SYSTEM_DEPS in build.sh and build.bat)
+    # headers of libbrotli{common,dec,enc}
+    - brotli
+    - hdrhistogram-c
+    - libdeflate
+    - libhwy
+    - libjpeg-turbo
+    - libwebp-base
     - if: unix
       then:
-        # headers of libbrotli{common,dec,enc}
-        - brotli
-        - hdrhistogram-c
-        - libdeflate
-        - libhwy
-        - libjpeg-turbo
-        - libwebp-base
+        # not available on Windows, vendored there
         - ls-hpack
-        - zlib
-        - zstd
-    - if: linux
+    - zlib
+    - zstd
+    - if: not osx
       then:
         # on macOS, bun loads the system's libsqlite3 at runtime
         - libsqlite
