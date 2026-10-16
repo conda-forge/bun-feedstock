@@ -51,7 +51,7 @@ source:
     file_name: simdutf-LICENSE-APACHE
 
 build:
-  number: 1
+  number: 2
 
 requirements:
   build:
@@ -107,6 +107,39 @@ requirements:
       then:
         # on macOS, bun loads the system's libsqlite3 at runtime
         - libsqlite
+  run_exports:
+    # `bun build --compile` copies the bun executable into the output, so the
+    # compiled binary links the same shared libraries as bun. Packages that
+    # put bun into host get them as run dependencies, with the same bounds as
+    # the libraries' own run_exports. No compiler or stdlib is needed for this,
+    # so the C/C++ runtime and system requirements are exported as well. On
+    # Windows, bun links the MSVC runtime statically.
+    weak:
+      - if: linux
+        then:
+          - __glibc >=${{ c_stdlib_version }},<3.0.a0
+          - ${{ pin_compatible('libgcc', upper_bound=None) }}
+          - ${{ pin_compatible('libstdcxx', upper_bound=None) }}
+      - if: osx
+        then:
+          - __osx >=${{ c_stdlib_version }}
+          - ${{ pin_compatible('libcxx', upper_bound=None) }}
+      - ${{ pin_compatible('hdrhistogram-c', upper_bound='x.x.x') }}
+      - ${{ pin_compatible('libbrotlicommon', upper_bound='x.x') }}
+      - ${{ pin_compatible('libbrotlidec', upper_bound='x.x') }}
+      - ${{ pin_compatible('libbrotlienc', upper_bound='x.x') }}
+      - ${{ pin_compatible('libdeflate', upper_bound='x.x') }}
+      - ${{ pin_compatible('libhwy', upper_bound='x.x') }}
+      - ${{ pin_compatible('libjpeg-turbo', upper_bound='x') }}
+      - ${{ pin_compatible('libwebp-base', upper_bound='x') }}
+      - ${{ pin_compatible('libzlib', upper_bound='x') }}
+      - if: unix
+        then:
+          - ${{ pin_compatible('ls-hpack', upper_bound='x.x.x') }}
+      - ${{ pin_compatible('zstd', upper_bound='x.x') }}
+      - if: not osx
+        then:
+          - ${{ pin_compatible('libsqlite', upper_bound='x') }}
 
 tests:
   - package_contents:
