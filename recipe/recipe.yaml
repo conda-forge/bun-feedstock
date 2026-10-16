@@ -51,9 +51,7 @@ source:
     file_name: simdutf-LICENSE-APACHE
 
 build:
-  skip: win
-  number: 0
-  script: build.sh
+  number: 1
 
 requirements:
   build:
@@ -74,13 +72,24 @@ requirements:
       then:
         - lld ${{ c_compiler_version }}.*
         - llvm-tools ${{ c_compiler_version }}.*
+        - sed
+    - if: win
+      then:
+        # clang-cl, lld-link, llvm-lib and llvm-rc; the MSVC headers and
+        # libraries come from the vs2022 compiler activation
+        - clang 21.*
+        - lld 21.*
+        - llvm-tools 21.*
+        # BoringSSL's and libjpeg-turbo's x64 assembly
+        - nasm
+        # the Windows .bin/ shim is built with -Zbuild-std
+        - rust-src
     - ninja
     - perl
     - pkg-config
-    - sed
   host:
     # unpatched upstream dependencies, used instead of the vendored copies
-    # (see BUN_SYSTEM_DEPS in build.sh)
+    # (see BUN_SYSTEM_DEPS in build.sh and build.bat)
     # headers of libbrotli{common,dec,enc}
     - brotli
     - hdrhistogram-c
@@ -88,10 +97,13 @@ requirements:
     - libhwy
     - libjpeg-turbo
     - libwebp-base
-    - ls-hpack
+    - if: unix
+      then:
+        # not available on Windows, vendored there
+        - ls-hpack
     - zlib
     - zstd
-    - if: linux
+    - if: not osx
       then:
         # on macOS, bun loads the system's libsqlite3 at runtime
         - libsqlite
@@ -102,9 +114,11 @@ tests:
         - bun
         - bunx
       files:
-        - share/bash-completion/completions/bun
-        - share/zsh/site-functions/_bun
-        - share/fish/vendor_completions.d/bun.fish
+        - if: unix
+          then:
+            - share/bash-completion/completions/bun
+            - share/zsh/site-functions/_bun
+            - share/fish/vendor_completions.d/bun.fish
       strict: true
   - script:
       - bun --version
