@@ -51,7 +51,7 @@ source:
     file_name: simdutf-LICENSE-APACHE
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
