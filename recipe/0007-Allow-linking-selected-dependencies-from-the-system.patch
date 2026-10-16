@@ -4,9 +4,9 @@ Date: Thu, 15 Oct 2026 12:13:21 +0200
 Subject: [PATCH] Allow linking selected dependencies from the system
 
 ---
- scripts/build/deps/lsquic.ts | 18 ++++++++---
- scripts/build/source.ts      | 63 ++++++++++++++++++++++++++++++++++++
- 2 files changed, 76 insertions(+), 5 deletions(-)
+ scripts/build/deps/lsquic.ts | 18 ++++++--
+ scripts/build/source.ts      | 90 ++++++++++++++++++++++++++++++++++++
+ 2 files changed, 103 insertions(+), 5 deletions(-)
 
 diff --git a/scripts/build/deps/lsquic.ts b/scripts/build/deps/lsquic.ts
 index becb1d0a..d2049940 100644
@@ -65,10 +65,10 @@ index becb1d0a..d2049940 100644
          // every LSQ_DEBUG body and format string compiles in: `LSQ_LOG_ENABLED`
          // then gates on a runtime array lookup the optimizer cannot fold, and
 diff --git a/scripts/build/source.ts b/scripts/build/source.ts
-index e57282be..794ab592 100644
+index e57282be..804d1cf1 100644
 --- a/scripts/build/source.ts
 +++ b/scripts/build/source.ts
-@@ -760,6 +760,61 @@ export function depSource(cfg: Config, dep: Dependency): Source {
+@@ -760,6 +760,84 @@ export function depSource(cfg: Config, dep: Dependency): Source {
    };
  }
  
@@ -88,6 +88,20 @@ index e57282be..794ab592 100644
 +  sqlite: ["sqlite3"],
 +  zlib: ["z"],
 +  zstd: ["zstd"],
++};
++
++/** Windows import library names that differ from the ones above. */
++const SYSTEM_DEP_LIBS_WINDOWS: Record<string, string[]> = {
++  libwebp: ["libwebpdemux", "libwebpmux", "libwebp", "libsharpyuv"],
++  zlib: ["zlib"],
++};
++
++/**
++ * Defines needed to consume the shared library instead of the static one on
++ * Windows, where data and C++ symbols have to be declared dllimport.
++ */
++const SYSTEM_DEP_DEFINES_WINDOWS: Record<string, string[]> = {
++  highway: ["HWY_SHARED_DEFINE"],
 +};
 +
 +/**
@@ -114,13 +128,22 @@ index e57282be..794ab592 100644
 +  assert(libNames !== undefined, `${dep.name} cannot be used from the system`, {
 +    hint: `Supported: ${Object.keys(SYSTEM_DEP_LIBS).join(", ")}`,
 +  });
-+  const ext = cfg.darwin ? ".dylib" : ".so";
++  const defines = [...(dep.provides(cfg).defines ?? [])];
++  let libs: string[];
++  if (cfg.windows) {
++    // import libraries: <prefix>/lib/<name>.lib
++    libs = (SYSTEM_DEP_LIBS_WINDOWS[dep.name] ?? libNames).map(l => resolve(prefix, "lib", `${l}.lib`));
++    defines.push(...(SYSTEM_DEP_DEFINES_WINDOWS[dep.name] ?? []));
++  } else {
++    const ext = cfg.darwin ? ".dylib" : ".so";
++    libs = libNames.map(l => resolve(prefix, "lib", `lib${l}${ext}`));
++  }
 +  return {
 +    name: dep.name,
-+    libs: libNames.map(l => resolve(prefix, "lib", `lib${l}${ext}`)),
++    libs,
 +    objects: [],
 +    includes: [resolve(prefix, "include")],
-+    defines: dep.provides(cfg).defines ?? [],
++    defines,
 +    sources: [],
 +    outputs: [],
 +    checks: [],
@@ -130,7 +153,7 @@ index e57282be..794ab592 100644
  /**
   * Resolve a dependency: emit ninja rules for fetch → configure → build,
   * return absolute paths for linking.
-@@ -777,6 +832,10 @@ export function resolveDep(
+@@ -777,6 +855,10 @@ export function resolveDep(
      return null;
    }
  
@@ -141,14 +164,18 @@ index e57282be..794ab592 100644
    const source = depSource(cfg, dep);
    const buildSpec = dep.build(cfg);
    const provides = dep.provides(cfg);
-@@ -1581,6 +1640,10 @@ function emitDirect(
+@@ -1581,6 +1663,14 @@ function emitDirect(
    }
  
    const incFlags = (spec.includes ?? []).map(i => `-I${q(resolve(srcDir, i))}`);
 +  // Vendored deps that include a system dep's headers (zlib.h for libarchive,
 +  // libspng and lsquic; lshpack.h for lsquic) find them here, after their own.
 +  const systemPrefix = systemDepsPrefix();
-+  if (systemPrefix !== undefined) incFlags.push(`-idirafter${q(resolve(systemPrefix, "include"))}`);
++  if (systemPrefix !== undefined) {
++    const dir = resolve(systemPrefix, "include");
++    // clang-cl only takes -idirafter as a driver flag passed through /clang:
++    incFlags.push(cfg.windows ? q(`/clang:-idirafter${dir}`) : `-idirafter${q(dir)}`);
++  }
    const defFlags = Object.entries(spec.defines ?? {}).map(([k, v]) => defineFlag(k, v));
    const libFlags = [...baseFlags, ...picFlags, ...incFlags, ...defFlags, ...(spec.cflags ?? [])];
  
