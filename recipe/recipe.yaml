@@ -1,5 +1,10 @@
 context:
   version: "1.4.4"
+  # the nightly bun pins in rust-toolchain.toml, as packaged on
+  # conda-forge/label/rust_dev. Later nightlies (from 2026-09-24) drop the
+  # allocator_api feature bun's crates enable, and stable 1.99 lacks
+  # core::mem::type_info::of, so only this one builds bun.
+  rust_nightly: "1.100.0.dev20260915"
 
 package:
   name: bun
@@ -56,12 +61,19 @@ requirements:
   build:
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
-    # nightly rust from conda-forge/label/rust_dev (see conda_build_config.yaml)
-    - ${{ compiler('rust') }}
+    # Not ${{ compiler('rust') }}: rust_dev has no activation package for this
+    # nightly, and bun's build drives rustc and cargo itself (target, linker and
+    # CC/CXX for build scripts are set in scripts/build/rust.ts), so the
+    # activation's environment isn't needed.
+    - rust ${{ rust_nightly }}.*
+    - if: target_platform == "linux-aarch64"
+      then:
+        # cross-compiled on linux-64
+        - rust-std-aarch64-unknown-linux-gnu ${{ rust_nightly }}.*
     # bun's link takes every Rust crate's rlib, std's included, so std is
     # always built from source with -Zbuild-std, which needs its sources at
     # $BUN_TOOLCHAIN_RUST/lib/rustlib/src/rust
-    - rust-src
+    - rust-src ${{ rust_nightly }}.*
     - ${{ stdlib('c') }}
     - if: linux
       then:
