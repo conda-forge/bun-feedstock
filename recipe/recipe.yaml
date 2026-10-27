@@ -79,10 +79,11 @@ requirements:
     - if: win
       then:
         # clang-cl, lld-link, llvm-lib and llvm-rc; the MSVC headers and
-        # libraries come from the vs2022 compiler activation
-        - clang 21.*
-        - lld 21.*
-        - llvm-tools 21.*
+        # libraries come from the vs2022 compiler activation. Same LLVM
+        # major as rustc's, see conda_build_config.yaml
+        - clang 23.*
+        - lld 23.*
+        - llvm-tools 23.*
         # BoringSSL's and libjpeg-turbo's x64 assembly
         - nasm
     - ninja
