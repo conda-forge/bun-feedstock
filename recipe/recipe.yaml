@@ -1,5 +1,5 @@
 context:
-  version: "1.4.2"
+  version: "1.4.4"
 
 package:
   name: bun
@@ -7,40 +7,39 @@ package:
 
 source:
   - url: https://github.com/oven-sh/bun/archive/refs/tags/bun-v${{ version }}.tar.gz
-    sha256: e14670b117d69012d828514d657f0a3133d1c25d13d69461184d05b6a8e9a876
+    sha256: 00ce37fa5ac393a7d225bcf847365982fceb818b56a19b6884fefd67918468ff
     patches:
       - 0001-Disable-Werror.patch
       - 0002-Don-t-statically-link-libstdc-and-libgcc.patch
       - 0003-Disable-ld_new.patch
-      - 0004-Use-prebuilt-Rust-std-for-release-builds.patch
-      - 0005-Support-cross-compiling-with-conda-forge-s-compilers.patch
-      - 0006-Use-the-macOS-SDK-from-the-conda-build-environment.patch
-      - 0007-Allow-linking-selected-dependencies-from-the-system.patch
-      - 0008-Set-the-build-revision-to-a-placeholder.patch
+      - 0004-Support-cross-compiling-with-conda-forge-s-compilers.patch
+      - 0005-Use-the-macOS-SDK-from-the-conda-build-environment.patch
+      - 0006-Allow-linking-selected-dependencies-from-the-system.patch
+      - 0007-Set-the-build-revision-to-a-placeholder.patch
   - if: build_platform == "osx-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-x64.zip
-      sha256: 80520d7e17526308c9185d261679ac6d27798d3803a0e9f7ff9121ab8affb012
+      sha256: 50a3491f73abc2fe81673171a85762d3bc2cc1680ccecadd983de99adf77977e
       target_directory: bun.native
   - if: build_platform == "osx-arm64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-aarch64.zip
-      sha256: 90987a3a16d7db556d886ac3d551e7b6d3edf0a1cf43acaed622e8676be1d12f
+      sha256: c240d7f0ccb90c263a849fcdb09b7ee62630d921348ed6aafda86b9d577bc510
       target_directory: bun.native
   - if: build_platform == "linux-aarch64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-linux-aarch64.zip
-      sha256: 54328bbc2d9c8e0c9f892c544d66c57a83b84139e34909e5ee81758f1ac8fda7
+      sha256: baa6bb36f51d6e58561e02bbea825038a9df454f673d6d776e8bbf86f8c7850e
       target_directory: bun.native
   - if: build_platform == "linux-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-linux-x64-baseline.zip
-      sha256: c678040f14fe0440eb839d37cbd0ce4c051a32da72806ac97de6a6aab6bf728f
+      sha256: e0446eb55995772eb9894bebae9a6be368d985a8b9271ee124486f9946eedd76
       target_directory: bun.native
   - if: build_platform == "win-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-windows-x64.zip
-      sha256: ce4c17497b2f29712a99d3d53f028de28cd42e3bacb8589599e7f000e49b6405
+      sha256: cd2c0fccc78f3ede1f50ca827a15f063eda13d4d150a3d0674f4f6e323d864a5
       target_directory: bun.native
   # simdutf is statically linked via the prebuilt WebKit, which doesn't ship its license
   - url: https://raw.githubusercontent.com/simdutf/simdutf/refs/heads/master/LICENSE-MIT
@@ -51,7 +50,7 @@ source:
     file_name: simdutf-LICENSE-APACHE
 
 build:
-  number: 1
+  number: 0
 
 requirements:
   build:
@@ -59,6 +58,10 @@ requirements:
     - ${{ compiler('cxx') }}
     # nightly rust from conda-forge/label/rust_dev (see conda_build_config.yaml)
     - ${{ compiler('rust') }}
+    # bun's link takes every Rust crate's rlib, std's included, so std is
+    # always built from source with -Zbuild-std, which needs its sources at
+    # $BUN_TOOLCHAIN_RUST/lib/rustlib/src/rust
+    - rust-src
     - ${{ stdlib('c') }}
     - if: linux
       then:
@@ -82,8 +85,6 @@ requirements:
         - llvm-tools 21.*
         # BoringSSL's and libjpeg-turbo's x64 assembly
         - nasm
-        # the Windows .bin/ shim is built with -Zbuild-std
-        - rust-src
     - ninja
     - perl
     - pkg-config
@@ -97,10 +98,9 @@ requirements:
     - libhwy
     - libjpeg-turbo
     - libwebp-base
-    - if: unix
-      then:
-        # not available on Windows, vendored there
-        - ls-hpack
+    # ls-hpack stays vendored: bun needs it built with
+    # LSXPACK_MAX_STRLEN=UINT32_MAX, which changes the ABI of
+    # struct lsxpack_header (see build.sh)
     - zlib
     - zstd
     - if: not osx
@@ -151,3 +151,4 @@ extra:
     - xhochy
     - pavelzw
     - I-Al-Istannen
+    - zklaus

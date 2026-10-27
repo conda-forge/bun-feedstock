@@ -48,9 +48,13 @@ export PATH="${toolchain}/bin:${PATH}"
 export BUN_TOOLCHAIN_RUST="${BUILD_PREFIX}"
 
 # Use the unpatched upstream dependencies from $PREFIX instead of building
-# the vendored copies (patch 0007). sqlite is only built on Linux; macOS
-# loads the system's libsqlite3 at runtime.
-export BUN_SYSTEM_DEPS="brotli,hdrhistogram,highway,libdeflate,libjpeg-turbo,libwebp,lshpack,sqlite,zlib,zstd"
+# the vendored copies (patch 0006). sqlite is only built on Linux; macOS
+# loads the system's libsqlite3 at runtime. ls-hpack stays vendored: since
+# 1.4.4 bun, lsquic and lsqpack build against lsxpack_header.h with
+# LSXPACK_MAX_STRLEN=UINT32_MAX, which widens the length fields of
+# struct lsxpack_header, so conda-forge's libls-hpack (built with the
+# default UINT16_MAX) is not ABI-compatible.
+export BUN_SYSTEM_DEPS="brotli,hdrhistogram,highway,libdeflate,libjpeg-turbo,libwebp,sqlite,zlib,zstd"
 export BUN_SYSTEM_DEPS_PREFIX="${PREFIX}"
 
 # bun's build switches to its own CI mode (env dumps, artifact downloads) when CI is set

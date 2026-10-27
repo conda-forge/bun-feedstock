@@ -1,0 +1,23 @@
+From d23b67d030af6f24a412b51fab71bd25b97e9f64 Mon Sep 17 00:00:00 2001
+From: Pavel Zwerschke <pavel.zwerschke@quantco.com>
+Date: Thu, 15 Oct 2026 13:42:05 +0200
+Subject: [PATCH 7/7] Set the build revision to a placeholder
+
+---
+ scripts/build/config.ts | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/scripts/build/config.ts b/scripts/build/config.ts
+index 8d2d2e3da45..aeb4a520b92 100644
+--- a/scripts/build/config.ts
++++ b/scripts/build/config.ts
+@@ -1611,6 +1611,9 @@ function readRustToolchainChannel(cwd: string): string | undefined {
+ }
+ 
+ function getGitRevision(cwd: string, pinDir: string | undefined): string {
++  // conda-forge builds from a release tarball without git history. Use a
++  // fixed placeholder; it must be at least 9 characters (GIT_SHA_SHORT).
++  return "not-set-in-conda-build";
+   // CI env first — authoritative and zero-cost.
+   const envSha = process.env.BUILDKITE_COMMIT ?? process.env.GITHUB_SHA ?? process.env.GIT_SHA;
+   if (envSha !== undefined && envSha.length > 0) {

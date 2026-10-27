@@ -13,8 +13,8 @@ for /f "delims=" %%i in ('rustc --print sysroot') do set "BUN_TOOLCHAIN_RUST=%%i
 if errorlevel 1 exit 1
 
 :: Use the unpatched upstream dependencies from %LIBRARY_PREFIX% instead of
-:: building the vendored copies (patch 0007), as in build.sh. There is no
-:: ls-hpack package for Windows, so it stays vendored.
+:: building the vendored copies (patch 0006), as in build.sh (which also
+:: says why ls-hpack stays vendored).
 set "BUN_SYSTEM_DEPS=brotli,hdrhistogram,highway,libdeflate,libjpeg-turbo,libwebp,sqlite,zlib,zstd"
 set "BUN_SYSTEM_DEPS_PREFIX=%LIBRARY_PREFIX%"
 

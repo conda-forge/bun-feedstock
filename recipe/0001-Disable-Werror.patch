@@ -1,17 +1,17 @@
-From d0b73fcf26911590df2b1de49605ed2866f8b468 Mon Sep 17 00:00:00 2001
+From ff3fc2e66e8b7a95215b28f98634952edc75068f Mon Sep 17 00:00:00 2001
 From: Julia Haag <julia.haag@quantco.com>
 Date: Thu, 8 Oct 2026 13:14:31 +0200
-Subject: [PATCH 1/6] Disable -Werror
+Subject: [PATCH 1/7] Disable -Werror
 
 ---
  scripts/build/flags.ts | 1 -
  1 file changed, 1 deletion(-)
 
 diff --git a/scripts/build/flags.ts b/scripts/build/flags.ts
-index 0b377562..9a056708 100644
+index 5b322de84f5..021a4cee863 100644
 --- a/scripts/build/flags.ts
 +++ b/scripts/build/flags.ts
-@@ -690,7 +690,6 @@ export const bunOnlyFlags: Flag[] = [
+@@ -751,7 +751,6 @@ export const bunOnlyFlags: Flag[] = [
        "-Wno-c++23-lambda-attributes",
        "-Wno-nullability-completeness",
        "-Wno-character-conversion",
