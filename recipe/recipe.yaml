@@ -100,7 +100,7 @@ requirements:
         - nasm
     - ninja
     - perl
-    - pkg-config
+    - pkgconf
   host:
     # unpatched upstream dependencies, used instead of the vendored copies
     # (see BUN_SYSTEM_DEPS in build.sh and build.bat)
