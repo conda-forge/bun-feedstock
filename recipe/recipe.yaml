@@ -96,7 +96,9 @@ requirements:
         - clang 23.*
         - lld 23.*
         - llvm-tools 23.*
-        # BoringSSL's and libjpeg-turbo's x64 assembly
+    - if: x86_64
+      then:
+        # x64 assembly of the vendored libjpeg-turbo and, on Windows, BoringSSL
         - nasm
     - ninja
     - perl
@@ -109,11 +111,12 @@ requirements:
     - hdrhistogram-c
     - libdeflate
     - libhwy
-    - libjpeg-turbo
     - libwebp-base
     # ls-hpack stays vendored: bun needs it built with
     # LSXPACK_MAX_STRLEN=UINT32_MAX, which changes the ABI of
     # struct lsxpack_header (see build.sh)
+    # libjpeg-turbo stays vendored: bun needs its own patch to it, which adds
+    # tj3BunCompletedWithWarning() (see build.sh)
     - zlib
     - zstd
     - if: not osx

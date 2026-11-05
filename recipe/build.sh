@@ -53,8 +53,10 @@ export BUN_TOOLCHAIN_RUST="${BUILD_PREFIX}"
 # 1.4.4 bun, lsquic and lsqpack build against lsxpack_header.h with
 # LSXPACK_MAX_STRLEN=UINT32_MAX, which widens the length fields of
 # struct lsxpack_header, so conda-forge's libls-hpack (built with the
-# default UINT16_MAX) is not ABI-compatible.
-export BUN_SYSTEM_DEPS="brotli,hdrhistogram,highway,libdeflate,libjpeg-turbo,libwebp,sqlite,zlib,zstd"
+# default UINT16_MAX) is not ABI-compatible. libjpeg-turbo stays vendored
+# too: since 1.4.4 bun calls tj3BunCompletedWithWarning(), which only its
+# own patch (patches/libjpeg-turbo/fatal-clears-warning.patch) adds.
+export BUN_SYSTEM_DEPS="brotli,hdrhistogram,highway,libdeflate,libwebp,sqlite,zlib,zstd"
 export BUN_SYSTEM_DEPS_PREFIX="${PREFIX}"
 
 # bun's build switches to its own CI mode (env dumps, artifact downloads) when CI is set

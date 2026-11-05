@@ -14,8 +14,8 @@ if errorlevel 1 exit 1
 
 :: Use the unpatched upstream dependencies from %LIBRARY_PREFIX% instead of
 :: building the vendored copies (patch 0006), as in build.sh (which also
-:: says why ls-hpack stays vendored).
-set "BUN_SYSTEM_DEPS=brotli,hdrhistogram,highway,libdeflate,libjpeg-turbo,libwebp,sqlite,zlib,zstd"
+:: says why ls-hpack and libjpeg-turbo stay vendored).
+set "BUN_SYSTEM_DEPS=brotli,hdrhistogram,highway,libdeflate,libwebp,sqlite,zlib,zstd"
 set "BUN_SYSTEM_DEPS_PREFIX=%LIBRARY_PREFIX%"
 
 :: bun's build switches to its own CI mode (env dumps, artifact downloads) when CI is set
