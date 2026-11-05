@@ -1,5 +1,3 @@
-MACOSX_DEPLOYMENT_TARGET:
-- '13.0'
 MACOSX_SDK_VERSION:
 - '13.0'
 brotli:
@@ -7,7 +5,7 @@ brotli:
 c_compiler:
 - clang
 c_compiler_version:
-- '21'
+- '23'
 c_stdlib:
 - macosx_deployment_target
 c_stdlib_version:
@@ -19,25 +17,19 @@ channel_targets:
 cxx_compiler:
 - clangxx
 cxx_compiler_version:
-- '21'
+- '23'
 hdrhistogram_c:
 - 0.11.10
 libdeflate:
 - '1.25'
 libhwy:
 - '1.4'
-libjpeg_turbo:
-- '3'
 libwebp_base:
 - '1'
-ls_hpack:
-- 2.3.5
 macos_machine:
 - x86_64-apple-darwin13.4.0
 perl:
 - 5.32.1
-rust_compiler:
-- rust
 target_platform:
 - osx-64
 zip_keys:

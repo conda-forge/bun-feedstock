@@ -4,11 +4,13 @@ c_compiler:
 cxx_compiler:
   - clangxx  # [unix]
   - vs2022   # [win]
-# https://github.com/oven-sh/bun/blob/9484218ba455ba591ebf75ad4fca98b012f3dd13/CONTRIBUTING.md?plain=1#L93
+# bun's link reads LLVM bitcode from both clang and rustc, so clang's LLVM
+# major version has to match the nightly rust's (pins.llvm.version in
+# scripts/build/ci-images/spec.ts moves together with rust-toolchain.toml)
 c_compiler_version:    # [unix]
-- 21                   # [unix]
+- 23                   # [unix]
 cxx_compiler_version:  # [unix]
-- 21                   # [unix]
+- 23                   # [unix]
 # https://github.com/oven-sh/bun/blob/b7475d87689307c8f0c4f008e878f4b5fb0cd7da/cmake/tools/SetupMacSDK.cmake#L1
 c_stdlib_version:      # [osx]
 - 13.0                 # [osx]
@@ -16,6 +18,8 @@ c_stdlib_version:      # [osx]
 # https://www.man7.org/linux/man-pages/man2/preadv2.2.html#HISTORY
 c_stdlib_version:      # [linux]
 - 2.28                 # [linux]
-# bun needs a nightly rust (see rust-toolchain.toml)
+# bun needs the exact nightly it pins in rust-toolchain.toml, repackaged on
+# conda-forge/label/rust_dev as rust <major.minor.patch>.dev<date> (see
+# recipe.yaml)
 channel_sources:
   - conda-forge/label/rust_dev,conda-forge
