@@ -173,6 +173,20 @@ tests:
       - bunx --version
       # simple smoke test
       - bunx cowsay hello
+  # `bun build --compile` produces a working executable. It is a copy of bun
+  # with the program embedded and finds bun's shared libraries relative to its
+  # own location, so it is written next to bun, where a package that compiles
+  # with bun has to install its executable too.
+  - script:
+      - if: unix
+        then:
+          - bun build --compile compile_smoke_test.js --outfile $PREFIX/bin/bun-compile-smoke-test
+        else:
+          - bun build --compile compile_smoke_test.js --outfile %PREFIX%\Library\bin\bun-compile-smoke-test.exe
+      - bun-compile-smoke-test with arguments
+    files:
+      recipe:
+        - compile_smoke_test.js
   # the run_exports above name the same packages as bun's run dependencies
   - script:
       file: check_run_exports.py
