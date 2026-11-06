@@ -16,16 +16,12 @@ libdeflate:
 - '1.25'
 libhwy:
 - '1.4'
-libjpeg_turbo:
-- '3'
 libsqlite:
 - '3'
 libwebp_base:
 - '1'
 perl:
 - 5.32.1
-rust_compiler:
-- rust
 target_platform:
 - win-64
 zlib:

@@ -1,0 +1,42 @@
+From 419644d888c4c01c66dbd2d229f533a74ce51b01 Mon Sep 17 00:00:00 2001
+From: Julia Haag <julia.haag@quantco.com>
+Date: Thu, 8 Oct 2026 13:15:22 +0200
+Subject: [PATCH 4/7] Support cross-compiling with conda-forge's compilers
+
+---
+ scripts/build/config.ts | 5 ++++-
+ scripts/build/tools.ts  | 5 +++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/build/config.ts b/scripts/build/config.ts
+index e32ce3113ab..35106cd2566 100644
+--- a/scripts/build/config.ts
++++ b/scripts/build/config.ts
+@@ -1183,7 +1183,10 @@ export function resolveConfig(partial: PartialConfig, toolchain: Toolchain): Con
+             ? partial.linuxSysroot
+             : resolve(cwd, partial.linuxSysroot)
+           : detectLinuxGlibcSysroot(arch);
+-      if (sysroot !== undefined || isCross) {
++      // conda-forge: with BUN_TOOLCHAIN_LLVM pointing at target-prefixed
++      // compiler wrappers (which already set target and sysroot), a
++      // cross-build needs no extra --target/--sysroot.
++      if (sysroot !== undefined || (isCross && process.env.BUN_TOOLCHAIN_LLVM === undefined)) {
+         crossTarget = `${llvmArch}-linux-gnu`;
+         if (sysroot === undefined) {
+           const p = locations.glibcSysroot[arch];
+diff --git a/scripts/build/tools.ts b/scripts/build/tools.ts
+index dfdc11780f2..d9f484e07e2 100644
+--- a/scripts/build/tools.ts
++++ b/scripts/build/tools.ts
+@@ -589,6 +589,11 @@ export function resolveLlvmToolchain(
+   if (msvcTarget && os !== "windows") {
+     hostCc = findLlvmTool("clang", paths, os, { checkVersion: false, required: true })?.path;
+     hostCxx = findLlvmTool("clang++", paths, os, { checkVersion: false, required: true })?.path;
++  } else if (process.env.CC_FOR_BUILD && process.env.CXX_FOR_BUILD) {
++    // conda-forge: cross-compilers are target-prefixed wrappers; host tools
++    // must be built with the build-platform compiler instead.
++    hostCc = process.env.CC_FOR_BUILD;
++    hostCxx = process.env.CXX_FOR_BUILD;
+   }
+ 
+   // ar: llvm-ar (or llvm-lib for windows targets)

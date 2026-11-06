@@ -1,5 +1,10 @@
 context:
-  version: "1.4.2"
+  version: "1.4.4"
+  # the nightly bun pins in rust-toolchain.toml, as packaged on
+  # conda-forge/label/rust_dev. Later nightlies (from 2026-09-24) drop the
+  # allocator_api feature bun's crates enable, and stable 1.99 lacks
+  # core::mem::type_info::of, so only this one builds bun.
+  rust_nightly: "1.100.0.dev20260915"
 
 package:
   name: bun
@@ -7,40 +12,39 @@ package:
 
 source:
   - url: https://github.com/oven-sh/bun/archive/refs/tags/bun-v${{ version }}.tar.gz
-    sha256: e14670b117d69012d828514d657f0a3133d1c25d13d69461184d05b6a8e9a876
+    sha256: 00ce37fa5ac393a7d225bcf847365982fceb818b56a19b6884fefd67918468ff
     patches:
       - 0001-Disable-Werror.patch
       - 0002-Don-t-statically-link-libstdc-and-libgcc.patch
       - 0003-Disable-ld_new.patch
-      - 0004-Use-prebuilt-Rust-std-for-release-builds.patch
-      - 0005-Support-cross-compiling-with-conda-forge-s-compilers.patch
-      - 0006-Use-the-macOS-SDK-from-the-conda-build-environment.patch
-      - 0007-Allow-linking-selected-dependencies-from-the-system.patch
-      - 0008-Set-the-build-revision-to-a-placeholder.patch
+      - 0004-Support-cross-compiling-with-conda-forge-s-compilers.patch
+      - 0005-Use-the-macOS-SDK-from-the-conda-build-environment.patch
+      - 0006-Allow-linking-selected-dependencies-from-the-system.patch
+      - 0007-Set-the-build-revision-to-a-placeholder.patch
   - if: build_platform == "osx-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-x64.zip
-      sha256: 80520d7e17526308c9185d261679ac6d27798d3803a0e9f7ff9121ab8affb012
+      sha256: 50a3491f73abc2fe81673171a85762d3bc2cc1680ccecadd983de99adf77977e
       target_directory: bun.native
   - if: build_platform == "osx-arm64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-darwin-aarch64.zip
-      sha256: 90987a3a16d7db556d886ac3d551e7b6d3edf0a1cf43acaed622e8676be1d12f
+      sha256: c240d7f0ccb90c263a849fcdb09b7ee62630d921348ed6aafda86b9d577bc510
       target_directory: bun.native
   - if: build_platform == "linux-aarch64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-linux-aarch64.zip
-      sha256: 54328bbc2d9c8e0c9f892c544d66c57a83b84139e34909e5ee81758f1ac8fda7
+      sha256: baa6bb36f51d6e58561e02bbea825038a9df454f673d6d776e8bbf86f8c7850e
       target_directory: bun.native
   - if: build_platform == "linux-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-linux-x64-baseline.zip
-      sha256: c678040f14fe0440eb839d37cbd0ce4c051a32da72806ac97de6a6aab6bf728f
+      sha256: e0446eb55995772eb9894bebae9a6be368d985a8b9271ee124486f9946eedd76
       target_directory: bun.native
   - if: build_platform == "win-64"
     then:
       url: https://github.com/oven-sh/bun/releases/download/bun-v${{ version }}/bun-windows-x64.zip
-      sha256: ce4c17497b2f29712a99d3d53f028de28cd42e3bacb8589599e7f000e49b6405
+      sha256: cd2c0fccc78f3ede1f50ca827a15f063eda13d4d150a3d0674f4f6e323d864a5
       target_directory: bun.native
   # simdutf is statically linked via the prebuilt WebKit, which doesn't ship its license
   - url: https://raw.githubusercontent.com/simdutf/simdutf/refs/heads/master/LICENSE-MIT
@@ -51,14 +55,25 @@ source:
     file_name: simdutf-LICENSE-APACHE
 
 build:
-  number: 1
+  number: 0
 
 requirements:
   build:
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
-    # nightly rust from conda-forge/label/rust_dev (see conda_build_config.yaml)
-    - ${{ compiler('rust') }}
+    # Not ${{ compiler('rust') }}: rust_dev has no activation package for this
+    # nightly, and bun's build drives rustc and cargo itself (target, linker and
+    # CC/CXX for build scripts are set in scripts/build/rust.ts), so the
+    # activation's environment isn't needed.
+    - rust ${{ rust_nightly }}.*
+    - if: target_platform == "linux-aarch64"
+      then:
+        # cross-compiled on linux-64
+        - rust-std-aarch64-unknown-linux-gnu ${{ rust_nightly }}.*
+    # bun's link takes every Rust crate's rlib, std's included, so std is
+    # always built from source with -Zbuild-std, which needs its sources at
+    # $BUN_TOOLCHAIN_RUST/lib/rustlib/src/rust
+    - rust-src ${{ rust_nightly }}.*
     - ${{ stdlib('c') }}
     - if: linux
       then:
@@ -76,17 +91,18 @@ requirements:
     - if: win
       then:
         # clang-cl, lld-link, llvm-lib and llvm-rc; the MSVC headers and
-        # libraries come from the vs2022 compiler activation
-        - clang 21.*
-        - lld 21.*
-        - llvm-tools 21.*
-        # BoringSSL's and libjpeg-turbo's x64 assembly
+        # libraries come from the vs2022 compiler activation. Same LLVM
+        # major as rustc's, see conda_build_config.yaml
+        - clang 23.*
+        - lld 23.*
+        - llvm-tools 23.*
+    - if: x86_64
+      then:
+        # x64 assembly of the vendored libjpeg-turbo and, on Windows, BoringSSL
         - nasm
-        # the Windows .bin/ shim is built with -Zbuild-std
-        - rust-src
     - ninja
     - perl
-    - pkg-config
+    - pkgconf
   host:
     # unpatched upstream dependencies, used instead of the vendored copies
     # (see BUN_SYSTEM_DEPS in build.sh and build.bat)
@@ -95,18 +111,49 @@ requirements:
     - hdrhistogram-c
     - libdeflate
     - libhwy
-    - libjpeg-turbo
     - libwebp-base
-    - if: unix
-      then:
-        # not available on Windows, vendored there
-        - ls-hpack
+    # ls-hpack stays vendored: bun needs it built with
+    # LSXPACK_MAX_STRLEN=UINT32_MAX, which changes the ABI of
+    # struct lsxpack_header (see build.sh)
+    # libjpeg-turbo stays vendored: bun needs its own patch to it, which adds
+    # tj3BunCompletedWithWarning() (see build.sh)
     - zlib
     - zstd
     - if: not osx
       then:
         # on macOS, bun loads the system's libsqlite3 at runtime
         - libsqlite
+  run_exports:
+    # `bun build --compile` copies the bun executable into its output, so the
+    # compiled program links the same shared libraries as bun. Packages that
+    # put bun into host get them as run dependencies, with the same bounds as
+    # bun's own run dependencies, which come from the run_exports of the
+    # requirements above. No compiler or stdlib is needed to compile with bun,
+    # so the C/C++ runtime and system requirements are exported as well.
+    # Keep this in sync with the build and host requirements;
+    # check_run_exports.py in the tests fails if the packages differ.
+    weak:
+      - if: linux
+        then:
+          - __glibc >=${{ c_stdlib_version }},<3.0.a0
+          - ${{ pin_compatible('libgcc', lower_bound='x', upper_bound=None) }}
+          - ${{ pin_compatible('libstdcxx', lower_bound='x', upper_bound=None) }}
+      - if: osx
+        then:
+          - __osx >=${{ c_stdlib_version }}
+          - libcxx >=${{ cxx_compiler_version }}
+      - ${{ pin_compatible('hdrhistogram-c', upper_bound='x.x.x') }}
+      - ${{ pin_compatible('libbrotlicommon', upper_bound='x.x') }}
+      - ${{ pin_compatible('libbrotlidec', upper_bound='x.x') }}
+      - ${{ pin_compatible('libbrotlienc', upper_bound='x.x') }}
+      - ${{ pin_compatible('libdeflate', upper_bound='x.x') }}
+      - ${{ pin_compatible('libhwy', upper_bound='x.x') }}
+      - ${{ pin_compatible('libwebp-base', upper_bound='x') }}
+      - ${{ pin_compatible('libzlib', upper_bound='x') }}
+      - ${{ pin_compatible('zstd', upper_bound='x.x') }}
+      - if: not osx
+        then:
+          - ${{ pin_compatible('libsqlite', upper_bound='x') }}
 
 tests:
   - package_contents:
@@ -119,6 +166,8 @@ tests:
             - share/bash-completion/completions/bun
             - share/zsh/site-functions/_bun
             - share/fish/vendor_completions.d/bun.fish
+        # rattler-build packages the files of the tests below here
+        - etc/conda/test-files/bun/*/compile_smoke_test.js
       strict: true
   - script:
       - bun --version
@@ -126,6 +175,27 @@ tests:
       - bunx --version
       # simple smoke test
       - bunx cowsay hello
+  # `bun build --compile` produces a working executable. It is a copy of bun
+  # with the program embedded and finds bun's shared libraries relative to its
+  # own location, so it is written next to bun, where a package that compiles
+  # with bun has to install its executable too.
+  - script:
+      - if: unix
+        then:
+          - bun build --compile compile_smoke_test.js --outfile $PREFIX/bin/bun-compile-smoke-test
+        else:
+          - bun build --compile compile_smoke_test.js --outfile %PREFIX%\Library\bin\bun-compile-smoke-test.exe
+      - bun-compile-smoke-test with arguments
+    files:
+      recipe:
+        - compile_smoke_test.js
+  # the run_exports above name the same packages as bun's run dependencies
+  - script:
+      file: check_run_exports.py
+      interpreter: python
+    requirements:
+      run:
+        - python
 
 about:
   homepage: https://bun.sh
@@ -151,3 +221,4 @@ extra:
     - xhochy
     - pavelzw
     - I-Al-Istannen
+    - zklaus

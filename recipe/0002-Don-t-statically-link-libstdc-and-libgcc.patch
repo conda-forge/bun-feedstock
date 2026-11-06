@@ -1,17 +1,17 @@
-From 6ce3c56f9a64316dfd9c74ed43d9bef0f467aa50 Mon Sep 17 00:00:00 2001
+From c9d8399695f65e67ddd53cd5c83aa23dcbb4a2be Mon Sep 17 00:00:00 2001
 From: Julia Haag <julia.haag@quantco.com>
 Date: Thu, 8 Oct 2026 13:14:41 +0200
-Subject: [PATCH 2/6] Don't statically link libstdc++ and libgcc
+Subject: [PATCH 2/7] Don't statically link libstdc++ and libgcc
 
 ---
  scripts/build/flags.ts | 5 -----
  1 file changed, 5 deletions(-)
 
 diff --git a/scripts/build/flags.ts b/scripts/build/flags.ts
-index 9a056708..9539c6e1 100644
+index 021a4cee863..95e35d9ed6d 100644
 --- a/scripts/build/flags.ts
 +++ b/scripts/build/flags.ts
-@@ -1237,11 +1237,6 @@ export const linkerFlags: Flag[] = [
+@@ -1304,11 +1304,6 @@ export const linkerFlags: Flag[] = [
      when: c => c.linux,
      desc: "Retry pthread_create EAGAIN caused by an in-flight execve",
    },
