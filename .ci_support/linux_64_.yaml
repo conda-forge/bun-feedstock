@@ -1,3 +1,5 @@
+DOCKER_PLATFORM:
+- linux/amd64
 brotli:
 - '1.2'
 c_compiler:
@@ -21,7 +23,7 @@ docker_image:
 hdrhistogram_c:
 - 0.11.10
 libdeflate:
-- '1.25'
+- '1.26'
 libhwy:
 - '1.4'
 libjpeg_turbo:
