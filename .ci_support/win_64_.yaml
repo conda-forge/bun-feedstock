@@ -11,9 +11,9 @@ channel_targets:
 cxx_compiler:
 - vs2022
 hdrhistogram_c:
-- 0.11.10
+- 0.12.1
 libdeflate:
-- '1.25'
+- '1.26'
 libhwy:
 - '1.4'
 libjpeg_turbo:
